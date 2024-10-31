@@ -22,6 +22,7 @@
 #include <memory>
 #include <optional>
 #include <utility>
+#include <iostream>
 
 #include "perfetto/base/logging.h"
 #include "perfetto/base/status.h"
@@ -107,8 +108,10 @@ void TraceProcessorStorageImpl::Flush() {
   if (unrecoverable_parse_error_)
     return;
 
-  if (context_.sorter)
+  if (context_.sorter) {
+    std::cout << "ECE496 TraceProcessorStorageImpl::Flush" << std::endl;
     context_.sorter->ExtractEventsForced();
+  }
   context_.args_tracker->Flush();
 }
 

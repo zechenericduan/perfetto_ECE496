@@ -28,6 +28,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 #include "perfetto/base/logging.h"
 #include "perfetto/ext/base/circular_queue.h"
@@ -308,6 +309,7 @@ class TraceSorter {
 
   void ExtractEventsForced() {
     BumpAllocator::AllocId end_id = token_buffer_.PastTheEndAllocId();
+    std::cout << "ECE496 ExtractEventForced" << std::endl;
     SortAndExtractEventsUntilAllocId(end_id);
     for (auto& sorter_data : sorter_data_by_machine_) {
       for (const auto& queue : sorter_data.queues) {
@@ -328,6 +330,7 @@ class TraceSorter {
       return;
     }
 
+    std::cout << "ECE496 NotifyReadBufferEvent" << std::endl;
     SortAndExtractEventsUntilAllocId(alloc_id_for_extraction_);
     alloc_id_for_extraction_ = token_buffer_.PastTheEndAllocId();
     flushes_since_extraction_ = 0;

@@ -20,6 +20,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 #include "perfetto/base/logging.h"
 #include "perfetto/base/status.h"
@@ -77,6 +78,7 @@ base::Status ReadTrace(
     TraceProcessor* tp,
     const char* filename,
     const std::function<void(uint64_t parsed_size)>& progress_callback) {
+  std::cout << "ECE496 readTrace" << std::endl;
   RETURN_IF_ERROR(ReadTraceUnfinalized(tp, filename, progress_callback));
   return tp->NotifyEndOfFile();
 }

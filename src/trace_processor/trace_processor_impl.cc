@@ -28,6 +28,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 #include "perfetto/base/build_config.h"
 #include "perfetto/base/logging.h"
@@ -518,6 +519,7 @@ void TraceProcessorImpl::SetCurrentTraceName(const std::string& name) {
 }
 
 void TraceProcessorImpl::Flush() {
+  std::cout << "ECE496 TraceProcessorImpl:Flush()" << std::endl;
   TraceProcessorStorageImpl::Flush();
   BuildBoundsTable(engine_->sqlite_engine()->db(),
                    GetTraceTimestampBoundsNs(*context_.storage));
@@ -537,6 +539,7 @@ base::Status TraceProcessorImpl::NotifyEndOfFile() {
     current_trace_name_ = "Unnamed trace";
 
   // Last opportunity to flush all pending data.
+  std::cout << "ECE496 TraceProcessorImpl::NotifyEndOfFile()" << std::endl;
   Flush();
 
   RETURN_IF_ERROR(TraceProcessorStorageImpl::NotifyEndOfFile());
