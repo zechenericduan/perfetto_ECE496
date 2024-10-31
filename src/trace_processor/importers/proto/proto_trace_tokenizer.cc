@@ -18,6 +18,7 @@
 #include "perfetto/trace_processor/trace_blob.h"
 
 #include "perfetto/ext/base/utils.h"
+#include <iostream>
 
 namespace perfetto {
 namespace trace_processor {
@@ -45,6 +46,7 @@ util::Status ProtoTraceTokenizer::Decompress(TraceBlobView input,
                            static_cast<int>(ret));
   }
 
+  std::cout << "ECE496 Hello" << std::endl;
   TraceBlob out_blob = TraceBlob::CopyFrom(data.data(), data.size());
   *output = TraceBlobView(std::move(out_blob));
   return util::OkStatus();

@@ -26,7 +26,7 @@
 
 namespace perfetto {
 namespace trace_processor {
-
+constexpr char kProgressChar = '\n';
 class TraceProcessor;
 
 // Reads trace without Flushing the data at the end.
@@ -35,6 +35,8 @@ util::Status PERFETTO_EXPORT_COMPONENT ReadTraceUnfinalized(
     const char* filename,
     const std::function<void(uint64_t parsed_size)>& progress_callback = {});
 
+bool ReadTraceUnfinalizedCLP(trace_processor::TraceProcessor* tp,
+                          std::istream* input);
 }  // namespace trace_processor
 }  // namespace perfetto
 

@@ -32,6 +32,10 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <iostream>
+#include <cstdlib>
+#include <array>
+#include <sstream>
 
 #include <google/protobuf/compiler/parser.h>
 #include <google/protobuf/descriptor.pb.h>
@@ -1093,10 +1097,12 @@ void ExtendPoolWithBinaryDescriptor(
 
 base::Status LoadTrace(const std::string& trace_file_path, double* size_mb) {
   base::Status read_status = ReadTraceUnfinalized(
-      g_tp, trace_file_path.c_str(), [&size_mb](size_t parsed_size) {
+      g_tp, trace_file_path.c_str(), [&size_mb](size_t parsed_size)
+      {
         *size_mb = static_cast<double>(parsed_size) / 1E6;
         fprintf(stderr, "\rLoading trace: %.2f MB\r", *size_mb);
       });
+  std::cout << "ECE496 LoadTrace Flush" << std::endl;
   g_tp->Flush();
   if (!read_status.ok()) {
     return base::ErrStatus("Could not read trace file (path: %s): %s",
@@ -1138,7 +1144,50 @@ base::Status LoadTrace(const std::string& trace_file_path, double* size_mb) {
   }
   return g_tp->NotifyEndOfFile();
 }
+////////////////////////////////////////////////
+base::Status LoadTraceCLP(const std::string& CLP_search_results) {
+  std::istringstream resultStream(CLP_search_results);
+  ReadTraceUnfinalizedCLP(
+      g_tp, &resultStream);
+  std::cout << "ECE496 LoadTraceCLP" << std::endl;
+  g_tp->Flush();
 
+  std::unique_ptr<profiling::Symbolizer> symbolizer =
+      profiling::LocalSymbolizerOrDie(profiling::GetPerfettoBinaryPath(),
+                                      getenv("PERFETTO_SYMBOLIZER_MODE"));
+
+  if (symbolizer) {
+    profiling::SymbolizeDatabase(
+        g_tp, symbolizer.get(), [](const std::string& trace_proto) {
+          std::unique_ptr<uint8_t[]> buf(new uint8_t[trace_proto.size()]);
+          memcpy(buf.get(), trace_proto.data(), trace_proto.size());
+          auto status = g_tp->Parse(std::move(buf), trace_proto.size());
+          if (!status.ok()) {
+            PERFETTO_DFATAL_OR_ELOG("Failed to parse: %s",
+                                    status.message().c_str());
+            return;
+          }
+        });
+    g_tp->Flush();
+  }
+
+  auto maybe_map = profiling::GetPerfettoProguardMapPath();
+  if (!maybe_map.empty()) {
+    profiling::ReadProguardMapsToDeobfuscationPackets(
+        maybe_map, [](const std::string& trace_proto) {
+          std::unique_ptr<uint8_t[]> buf(new uint8_t[trace_proto.size()]);
+          memcpy(buf.get(), trace_proto.data(), trace_proto.size());
+          auto status = g_tp->Parse(std::move(buf), trace_proto.size());
+          if (!status.ok()) {
+            PERFETTO_DFATAL_OR_ELOG("Failed to parse: %s",
+                                    status.message().c_str());
+            return;
+          }
+        });
+  }
+  return g_tp->NotifyEndOfFile();
+}
+///////////////////////////////////////////////
 base::Status RunQueries(const std::string& queries, bool expect_output) {
   base::Status status;
   if (expect_output) {
@@ -1692,7 +1741,8 @@ base::Status TraceProcessorMain(int argc, char** argv) {
   }
 
   base::TimeNanos t_load{};
-  if (!options.trace_file_path.empty()) {
+  if (options.trace_file_path.empty()) {
+
     base::TimeNanos t_load_start = base::GetWallTimeNs();
     double size_mb = 0;
     RETURN_IF_ERROR(LoadTrace(options.trace_file_path, &size_mb));
@@ -1703,6 +1753,38 @@ base::Status TraceProcessorMain(int argc, char** argv) {
                   t_load_s, size_mb / t_load_s);
 
     RETURN_IF_ERROR(PrintStats());
+  }
+  else //ECE496 Method //////////////////////////////////////////////
+  {
+    std::cout << "ECE496 load path: " << options.trace_file_path << std::endl;
+    const char* command = "/home/zechduan/workspace/ECE496_SourceCode/clp/build/core/clp-s s ~/workspace/ECE496_SourceCode/jsonl_converter/json_compressed_1724 '\"*\"'";  // Example command
+
+    // Use popen() to run the command and get the output stream
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command, "r"), pclose);
+    if (!pipe) {
+        std::cerr << "Failed to run command." << std::endl;
+    }
+
+    std::array<char, 8192> buffer;
+    std::string result;
+    
+    // Read the output from the command line by chunks
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+    //std::cout << "Reading chunk: " << buffer.data();  // Debug output
+    result += buffer.data();
+    }
+
+    // Print the captured output
+    std::cout << "Command output:\n" << result << "this is my result mf"<< std::endl;
+///////////////////////////////
+
+    //////// Change load trace from buffer
+    RETURN_IF_ERROR(LoadTraceCLP(result));
+    std::cout << "Trace loaded CLP"<< std::endl;
+    RETURN_IF_ERROR(PrintStats());
+    ////////
+
+
   }
 
 #if PERFETTO_HAS_SIGNAL_H()

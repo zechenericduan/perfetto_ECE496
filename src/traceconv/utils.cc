@@ -24,6 +24,7 @@
 #include <ostream>
 #include <set>
 #include <utility>
+#include <iostream>
 
 #include "perfetto/base/logging.h"
 #include "perfetto/ext/base/file_utils.h"

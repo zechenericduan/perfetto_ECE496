@@ -22,6 +22,7 @@
 #include <limits>
 #include <memory>
 #include <utility>
+#include <iostream>
 
 #include "perfetto/base/compiler.h"
 #include "perfetto/base/logging.h"
@@ -129,6 +130,7 @@ void TraceSorter::Queue::Sort(TraceTokenBuffer& buffer, bool use_slow_sorting) {
 void TraceSorter::SortAndExtractEventsUntilAllocId(
     BumpAllocator::AllocId limit_alloc_id) {
   constexpr int64_t kTsMax = std::numeric_limits<int64_t>::max();
+  std::cout << "ECE496 SortAndExtractEventUntilAllocId" << std::endl;
   for (;;) {
     size_t min_machine_idx = 0;
     size_t min_queue_idx = 0;  // The index of the queue with the min(ts).

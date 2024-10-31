@@ -33,7 +33,7 @@
 
 #include "protos/perfetto/trace/trace.pbzero.h"
 #include "protos/perfetto/trace/trace_packet.pbzero.h"
-
+#include <iostream>
 namespace perfetto {
 namespace trace_processor {
 namespace {
@@ -111,6 +111,45 @@ util::Status ReadTraceUnfinalized(
   if (progress_callback)
     progress_callback(bytes_read);
   return util::OkStatus();
+}
+bool ReadTraceUnfinalizedCLP(trace_processor::TraceProcessor* tp,
+                          std::istream* input) {
+  std::cout << "ECE496 from stream ReadTraceUnfinalizeCLP" << std::endl;
+  // 1MB chunk size seems the best tradeoff on a MacBook Pro 2013 - i7 2.8 GHz.
+
+// Printing the status update on stderr can be a perf bottleneck. On WASM print
+// status updates more frequently because it can be slower to parse each chunk.
+#if PERFETTO_BUILDFLAG(PERFETTO_OS_WASM)
+  constexpr int kStderrRate = 1;
+#else
+  constexpr int kStderrRate = 128;
+#endif
+  uint64_t file_size = 0;
+
+  for (int i = 0;; i++) {
+    if (i % kStderrRate == 0) {
+      fprintf(stderr, "Loading trace %.2f MB%c",
+              static_cast<double>(file_size) / 1.0e6, kProgressChar);
+      fflush(stderr);
+    }
+
+    std::unique_ptr<uint8_t[]> buf(new uint8_t[kChunkSize]);
+    input->read(reinterpret_cast<char*>(buf.get()), kChunkSize);
+    if (input->bad()) {
+      PERFETTO_ELOG("Failed when reading trace");
+      return false;
+    }
+
+    auto rsize = input->gcount();
+    if (rsize <= 0)
+      break;
+    file_size += static_cast<uint64_t>(rsize);
+    tp->Parse(std::move(buf), static_cast<size_t>(rsize));
+  }
+
+  fprintf(stderr, "Loaded trace%c", kProgressChar);
+  fflush(stderr);
+  return true;
 }
 }  // namespace trace_processor
 }  // namespace perfetto
