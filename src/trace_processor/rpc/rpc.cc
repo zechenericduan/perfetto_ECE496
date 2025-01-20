@@ -24,7 +24,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-
+#include <iostream>
 #include "perfetto/base/logging.h"
 #include "perfetto/base/status.h"
 #include "perfetto/base/time.h"
@@ -196,6 +196,7 @@ void Rpc::ParseRpcRequest(const uint8_t* data, size_t len) {
   static const char kErrFieldNotSet[] = "RPC error: request field not set";
   switch (req_type) {
     case RpcProto::TPM_APPEND_TRACE_DATA: {
+      std::cout << "RPC.CC: TPM_APPEND_TRACE_DATA" << std::endl;
       Response resp(tx_seq_id_++, req_type);
       auto* result = resp->set_append_result();
       if (!req.has_append_trace_data()) {
@@ -211,6 +212,7 @@ void Rpc::ParseRpcRequest(const uint8_t* data, size_t len) {
       break;
     }
     case RpcProto::TPM_FINALIZE_TRACE_DATA: {
+      std::cout << "RPC RPC RPC" << std::endl;
       Response resp(tx_seq_id_++, req_type);
       NotifyEndOfFile();
       resp.Send(rpc_response_fn_);
@@ -349,6 +351,7 @@ void Rpc::ParseRpcRequest(const uint8_t* data, size_t len) {
 }
 
 base::Status Rpc::Parse(const uint8_t* data, size_t len) {
+  std::cout << "rpc.cc base::Status Rpc:Parse" << std::endl;
   PERFETTO_TP_TRACE(
       metatrace::Category::API_TIMELINE, "RPC_PARSE",
       [&](metatrace::Record* r) { r->AddArg("length", std::to_string(len)); });

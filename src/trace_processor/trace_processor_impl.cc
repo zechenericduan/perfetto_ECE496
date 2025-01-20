@@ -503,6 +503,7 @@ TraceProcessorImpl::TraceProcessorImpl(const Config& cfg)
 TraceProcessorImpl::~TraceProcessorImpl() = default;
 
 base::Status TraceProcessorImpl::Parse(TraceBlobView blob) {
+  std::cout<< "TraceProcessorImpl::Parse" << std::endl;
   bytes_parsed_ += blob.size();
   return TraceProcessorStorageImpl::Parse(std::move(blob));
 }

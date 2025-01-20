@@ -21,7 +21,7 @@
 #include <optional>
 #include <string>
 #include <utility>
-
+#include <iostream>
 #include "perfetto/base/build_config.h"
 #include "perfetto/base/logging.h"
 #include "perfetto/base/status.h"
@@ -74,7 +74,7 @@ void JsonTraceParserImpl::ParseSystraceLine(int64_t, SystraceLine line) {
 void JsonTraceParserImpl::ParseJsonPacket(int64_t timestamp,
                                           std::string string_value) {
   PERFETTO_DCHECK(json::IsJsonSupported());
-
+  std::cout << "JsonTraceParserImpl::ParseJsonPacket" << std::endl;
   auto opt_value = json::ParseJsonString(base::StringView(string_value));
   if (!opt_value) {
     context_->storage->IncrementStats(stats::json_parser_failure);

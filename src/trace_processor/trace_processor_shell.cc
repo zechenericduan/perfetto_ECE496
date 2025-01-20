@@ -1108,7 +1108,7 @@ base::Status LoadTrace(const std::string& trace_file_path, double* size_mb) {
     return base::ErrStatus("Could not read trace file (path: %s): %s",
                            trace_file_path.c_str(), read_status.c_message());
   }
-
+/////////////////////////
   std::unique_ptr<profiling::Symbolizer> symbolizer =
       profiling::LocalSymbolizerOrDie(profiling::GetPerfettoBinaryPath(),
                                       getenv("PERFETTO_SYMBOLIZER_MODE"));
@@ -1155,7 +1155,7 @@ base::Status LoadTraceCLP(const std::string& CLP_search_results) {
   std::unique_ptr<profiling::Symbolizer> symbolizer =
       profiling::LocalSymbolizerOrDie(profiling::GetPerfettoBinaryPath(),
                                       getenv("PERFETTO_SYMBOLIZER_MODE"));
-
+////////////////////////////////////////////////////////////
   if (symbolizer) {
     profiling::SymbolizeDatabase(
         g_tp, symbolizer.get(), [](const std::string& trace_proto) {
@@ -1741,8 +1741,8 @@ base::Status TraceProcessorMain(int argc, char** argv) {
   }
 
   base::TimeNanos t_load{};
-  if (options.trace_file_path.empty()) {
-
+  if ((!options.trace_file_path.empty()) && (options.trace_file_path.find("clp") == std::string::npos)) {
+    std::cout <<"Perfetto original Path " << std::endl; 
     base::TimeNanos t_load_start = base::GetWallTimeNs();
     double size_mb = 0;
     RETURN_IF_ERROR(LoadTrace(options.trace_file_path, &size_mb));
@@ -1756,8 +1756,31 @@ base::Status TraceProcessorMain(int argc, char** argv) {
   }
   else //ECE496 Method //////////////////////////////////////////////
   {
-    std::cout << "ECE496 load path: " << options.trace_file_path << std::endl;
-    const char* command = "/home/zechduan/workspace/ECE496_SourceCode/clp/build/core/clp-s s ~/workspace/ECE496_SourceCode/jsonl_converter/json_compressed_1724 '\"*\"'";  // Example command
+    std::cout <<"ECE496 load path: " << options.trace_file_path << std::endl;
+    std::string search_command = "/home/zechduan/workspace/ECE496_SourceCode/clp/build/core/clp-s s ";
+    std::string clp_archive = options.trace_file_path;
+    std::string search_all = " '\"*\"'";
+    search_command += clp_archive; 
+    search_command += search_all;
+    std::cout << "Search command:" << search_command << std::endl;
+
+    const char* command = search_command.c_str();
+    //const char* command = "/home/zechduan/workspace/ECE496_SourceCode/clp/build/core/clp-s s ~/workspace/ECE496_SourceCode/jsonl_converter/empty_everything_compressed '\"*\"'";  // Example command
+  //   const char* first_half = "{
+  // "schemaVersion": 1,
+  // "deviceProperties": [
+  //   {
+  //     "id": 0, "name": "Tesla T4", "totalGlobalMem": 15835660288,
+  //     "computeMajor": 7, "computeMinor": 5,
+  //     "maxThreadsPerBlock": 1024, "maxThreadsPerMultiprocessor": 1024,
+  //     "regsPerBlock": 65536, "warpSize": 32,
+  //     "sharedMemPerBlock": 49152, "numSms": 40
+  //   , "regsPerMultiprocessor": 65536, "sharedMemPerBlockOptin": 65536, "sharedMemPerMultiprocessor": 65536
+  //   }
+  // ],
+  // "traceEvents": [";
+
+  // const char* second_half = "]}";
 
     // Use popen() to run the command and get the output stream
     std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command, "r"), pclose);
@@ -1775,7 +1798,7 @@ base::Status TraceProcessorMain(int argc, char** argv) {
     }
 
     // Print the captured output
-    std::cout << "Command output:\n" << result << "this is my result mf"<< std::endl;
+    //std::cout << "Command output:\n" << result << "this is my result mf"<< std::endl;
 ///////////////////////////////
 
     //////// Change load trace from buffer

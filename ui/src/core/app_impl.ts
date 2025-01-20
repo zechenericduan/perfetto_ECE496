@@ -193,6 +193,7 @@ export class AppImpl implements App {
   }
 
   private async openTrace(src: TraceSource) {
+    console.log("open trace 496")
     assertTrue(this.pluginId === CORE_PLUGIN_ID);
     this.closeCurrentTrace();
     this.appCtx.isLoadingTrace = true;

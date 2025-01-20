@@ -296,6 +296,7 @@ export abstract class EngineBase implements Engine, Disposable {
   // Push trace data into the engine. The engine is supposed to automatically
   // figure out the type of the trace (JSON vs Protobuf).
   parse(data: Uint8Array): Promise<void> {
+    console.log("engine.ts : Parse");
     const asyncRes = defer<void>();
     this.pendingParses.push(asyncRes);
     const rpc = TraceProcessorRpc.create();

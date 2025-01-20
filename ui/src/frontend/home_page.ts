@@ -28,15 +28,15 @@ export class Hints implements m.ClassComponent {
         'ul',
         m(
           'li',
-          'New updated ',
-          m(
-            Anchor,
-            {
-              href: 'https://perfetto.dev/docs/visualization/perfetto-ui#tabs-v2',
-            },
-            'tabs',
-          ),
-          ' are extensible and user friendly.',
+          'New update: ',
+          'This version of Perfetto UI is specifically designed to accomadte YScope archive.',
+        ),
+        m(
+          Anchor,
+          {
+            href: 'https://yscope.com/',
+          },
+          'What is HAHA YScope?',
         ),
         m(
           'li',

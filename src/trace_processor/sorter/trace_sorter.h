@@ -130,6 +130,8 @@ class TraceSorter {
   SortingMode sorting_mode() const { return sorting_mode_; }
 
   void AddMachineContext(TraceProcessorContext* context) {
+    std::cout << "AddMachineContext" << std::endl;
+    std::cout << context << std::endl;
     sorter_data_by_machine_.emplace_back(context);
   }
 
@@ -164,6 +166,7 @@ class TraceSorter {
   void PushTracePacket(int64_t timestamp,
                        TracePacketData data,
                        std::optional<MachineId> machine_id = std::nullopt) {
+    std::cout<< "PushTracePacket1" << std::endl;
     AppendNonFtraceEvent(timestamp, TimestampedEvent::Type::kTracePacket,
                          std::move(data), machine_id);
   }
@@ -172,6 +175,7 @@ class TraceSorter {
                        RefPtr<PacketSequenceStateGeneration> state,
                        TraceBlobView tbv,
                        std::optional<MachineId> machine_id = std::nullopt) {
+    std::cout<< "PushTracePacket2" << std::endl;
     PushTracePacket(timestamp,
                     TracePacketData{std::move(tbv), std::move(state)},
                     machine_id);
@@ -184,10 +188,12 @@ class TraceSorter {
       // We need to account for slices with duration by sorting them first: this
       // requires us to use the slower comparator which takes this into account.
       use_slow_sorting_ = true;
+      std::cout<< "PushJsonValue1" << std::endl;
       AppendNonFtraceEvent(timestamp, TimestampedEvent::Type::kJsonValueWithDur,
                            JsonWithDurEvent{*dur, std::move(json_value)});
       return;
     }
+    std::cout<< "PushJsonValue2" << std::endl;
     AppendNonFtraceEvent(timestamp, TimestampedEvent::Type::kJsonValue,
                          JsonEvent{std::move(json_value)});
   }
@@ -207,6 +213,7 @@ class TraceSorter {
       int64_t timestamp,
       TrackEventData track_event,
       std::optional<MachineId> machine_id = std::nullopt) {
+        std::cout<< "PushTrackEventPacket" << std::endl;
     AppendNonFtraceEvent(timestamp, TimestampedEvent::Type::kTrackEvent,
                          std::move(track_event), machine_id);
   }
@@ -262,6 +269,7 @@ class TraceSorter {
     if (PERFETTO_UNLIKELY(event_handling_ == EventHandling::kDrop)) {
       return;
     }
+    std::cout<<"PushFtraceEvent" << std::endl;
     TraceTokenBuffer::Id id =
         token_buffer_.Append(TracePacketData{std::move(tbv), std::move(state)});
     auto* queue = GetQueue(cpu + 1, machine_id);
@@ -285,6 +293,7 @@ class TraceSorter {
     // sorted however. Consider adding extra queues, or pushing them in a
     // merge-sort fashion
     // // instead.
+    std::cout<<"PushInlineFtraceEvent 1" << std::endl;
     TraceTokenBuffer::Id id = token_buffer_.Append(inline_sched_switch);
     auto* queue = GetQueue(cpu + 1, machine_id);
     queue->Append(timestamp, TimestampedEvent::Type::kInlineSchedSwitch, id,
@@ -300,6 +309,7 @@ class TraceSorter {
     if (PERFETTO_UNLIKELY(event_handling_ == EventHandling::kDrop)) {
       return;
     }
+    std::cout<<"PushInlineFtraceEvent 2" << std::endl;
     TraceTokenBuffer::Id id = token_buffer_.Append(inline_sched_waking);
     auto* queue = GetQueue(cpu + 1, machine_id);
     queue->Append(timestamp, TimestampedEvent::Type::kInlineSchedWaking, id,
@@ -481,6 +491,7 @@ class TraceSorter {
   Queue* GetQueue(size_t index,
                   std::optional<MachineId> machine_id = std::nullopt) {
     // sorter_data_by_machine_[0] corresponds to the default machine.
+    std::cout << "Modify queue" << std::endl;
     PERFETTO_DCHECK(sorter_data_by_machine_[0].machine_id == std::nullopt);
     auto* queues = &sorter_data_by_machine_[0].queues;
 
@@ -510,6 +521,7 @@ class TraceSorter {
       return;
     }
     TraceTokenBuffer::Id id = token_buffer_.Append(std::forward<E>(evt));
+    std::cout<<"AppendNonFtraceEvent" << std::endl;
     AppendNonFtraceEventWithId(ts, event_type, id, machine_id);
   }
 

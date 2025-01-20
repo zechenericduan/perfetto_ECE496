@@ -111,11 +111,10 @@ export default class implements PerfettoPlugin {
     input.style.display = 'none';
     input.addEventListener('change', onInputElementFileSelectionChanged);
     document.body.appendChild(input);
-
     const OPEN_TRACE_COMMAND_ID = 'perfetto.CoreCommands#openTrace';
     ctx.commands.registerCommand({
       id: OPEN_TRACE_COMMAND_ID,
-      name: 'Open trace file',
+      name: 'Open trace file ECE496',
       callback: () => {
         delete input.dataset['useCatapultLegacyUi'];
         input.click();
@@ -312,6 +311,7 @@ function promptForTimestamp(message: string): time | undefined {
 }
 
 function onInputElementFileSelectionChanged(e: Event) {
+  console.log('logEvent called with:')
   if (!(e.target instanceof HTMLInputElement)) {
     throw new Error('Not an input element');
   }

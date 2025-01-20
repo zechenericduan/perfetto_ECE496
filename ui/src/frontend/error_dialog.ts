@@ -332,6 +332,7 @@ function showUnknownFileError() {
         m('li', 'Android systrace'),
         m('li', 'Fuchsia trace'),
         m('li', 'Ninja build log'),
+        m('li', 'Compressed CLP archive .7z'),
       ),
     ),
   });

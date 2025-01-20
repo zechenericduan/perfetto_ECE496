@@ -117,6 +117,7 @@ export async function loadTrace(
   app: AppImpl,
   traceSource: TraceSource,
 ): Promise<TraceImpl> {
+  console.log("load trace2 496");
   updateStatus(app, 'Opening trace');
   const engineId = `${++lastEngineId}`;
   const engine = await createEngine(app, engineId);
@@ -129,6 +130,7 @@ async function createEngine(
 ): Promise<EngineBase> {
   // Check if there is any instance of the trace_processor_shell running in
   // HTTP RPC mode (i.e. trace_processor_shell -D).
+  console.log("rpc");
   let useRpc = false;
   if (app.newEngineMode === 'USE_HTTP_RPC_IF_AVAILABLE') {
     useRpc = (await HttpRpcEngine.checkConnection()).connected;
@@ -160,6 +162,8 @@ async function loadTraceIntoEngine(
   traceSource: TraceSource,
   engine: EngineBase,
 ): Promise<TraceImpl> {
+  console.log("loadTraceIntoEngine");
+  console.log(traceSource.type);
   let traceStream: TraceStream | undefined;
   let serializedAppState: SerializedAppState | undefined;
   if (traceSource.type === 'FILE') {
@@ -181,6 +185,7 @@ async function loadTraceIntoEngine(
   // trace_processor_shell). In this case we don't want the UI to load any
   // file/stream and we just want to jump to the loading phase.
   if (traceStream !== undefined) {
+    console.log("traceStream !=  undefined")
     const tStart = performance.now();
     for (;;) {
       const res = await traceStream.readChunk();

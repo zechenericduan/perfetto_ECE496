@@ -51,6 +51,7 @@ TraceSorter::TraceSorter(TraceProcessorContext* context,
     : sorting_mode_(sorting_mode),
       storage_(context->storage),
       event_handling_(event_handling) {
+  std::cout << "TraceSorter call AddMachineContext" << std::endl;
   AddMachineContext(context);
 }
 
@@ -142,12 +143,17 @@ void TraceSorter::SortAndExtractEventsUntilAllocId(
     // This loop identifies the queue which starts with the earliest event and
     // also remembers the earliest event of the 2nd queue (in min_queue_ts[1]).
     bool all_queues_empty = true;
+    std::cout << "SortAndExtractEventUntilAllocId, sorter_data_by_machine_.size(): " << sorter_data_by_machine_.size() << std::endl;
     for (size_t m = 0; m < sorter_data_by_machine_.size(); m++) {
+      std::cout << "2: ForLoop" << std::endl;
       TraceSorterData& sorter_data = sorter_data_by_machine_[m];
       for (size_t i = 0; i < sorter_data.queues.size(); i++) {
+        std::cout << "SortAndExtractEventUntilAllocId, sorter_data.queues.size(): " << sorter_data.queues.size() << std::endl;
         auto& queue = sorter_data.queues[i];
-        if (queue.events_.empty())
-          continue;
+        if (queue.events_.empty()) {
+            std::cout << "queue.events_.empty() break" << std::endl;
+            continue;
+        }
         PERFETTO_DCHECK(queue.max_ts_ <= append_max_ts_);
 
         // Checking for |all_queues_empty| is necessary here as in fuzzer cases
@@ -165,7 +171,10 @@ void TraceSorter::SortAndExtractEventsUntilAllocId(
       }
     }
     if (all_queues_empty)
+    {
+      std::cout << "all_queues_empty = True" << std::endl;
       break;
+    }
 
     auto& sorter_data = sorter_data_by_machine_[min_machine_idx];
     auto& queue = sorter_data.queues[min_queue_idx];
@@ -179,6 +188,7 @@ void TraceSorter::SortAndExtractEventsUntilAllocId(
     // limit, whichever comes first.
     size_t num_extracted = 0;
     for (auto& event : events) {
+      std::cout << "1: ForLoop" << std::endl;
       if (event.alloc_id() >= limit_alloc_id) {
         break;
       }
@@ -219,6 +229,7 @@ void TraceSorter::SortAndExtractEventsUntilAllocId(
 
 void TraceSorter::ParseTracePacket(TraceProcessorContext& context,
                                    const TimestampedEvent& event) {
+  std::cout << "TraceSorter::ParseTracePacket" << std::endl;                                  
   TraceTokenBuffer::Id id = GetTokenBufferId(event);
   switch (event.type()) {
     case TimestampedEvent::Type::kPerfRecord:
@@ -420,6 +431,7 @@ void TraceSorter::ExtractAndDiscardTokenizedObject(
 void TraceSorter::MaybeExtractEvent(size_t min_machine_idx,
                                     size_t queue_idx,
                                     const TimestampedEvent& event) {
+  std::cout << "TraceSorter::MaybeExtractEvent" << std::endl;
   auto* machine_context =
       sorter_data_by_machine_[min_machine_idx].machine_context;
   int64_t timestamp = event.ts;
@@ -437,6 +449,7 @@ void TraceSorter::MaybeExtractEvent(size_t min_machine_idx,
   PERFETTO_DCHECK(event_handling_ == EventHandling::kSortAndPush);
 
   if (queue_idx == 0) {
+    std::cout << "queue_idx == 0, ParseTracePacket" << std::endl;
     ParseTracePacket(*machine_context, event);
   } else {
     // Ftrace queues start at offset 1. So queues_[1] = cpu[0] and so on.

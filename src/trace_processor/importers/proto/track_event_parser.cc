@@ -22,7 +22,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-
+#include <iostream>
 #include "perfetto/base/logging.h"
 #include "perfetto/base/status.h"
 #include "perfetto/ext/base/string_view.h"
@@ -1722,6 +1722,7 @@ void TrackEventParser::AddActiveProcess(int64_t packet_timestamp, int32_t pid) {
 }
 
 void TrackEventParser::NotifyEndOfFile() {
+  std::cout << "END TrackEventParser::NotifyEndOfFile()" << std::endl;
   active_chrome_processes_tracker_.NotifyEndOfFile();
 }
 

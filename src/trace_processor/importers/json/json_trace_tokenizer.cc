@@ -22,7 +22,7 @@
 #include <memory>
 #include <optional>
 #include <string>
-
+#include <iostream>
 #include "perfetto/base/logging.h"
 #include "perfetto/base/status.h"
 #include "perfetto/ext/base/string_utils.h"
@@ -459,7 +459,7 @@ JsonTraceTokenizer::~JsonTraceTokenizer() = default;
 
 base::Status JsonTraceTokenizer::Parse(TraceBlobView blob) {
   PERFETTO_DCHECK(json::IsJsonSupported());
-
+  std::cout << "JsonTraceTokenizer::Parse"<< std::endl;
   buffer_.insert(buffer_.end(), blob.data(), blob.data() + blob.size());
   const char* buf = buffer_.data();
   const char* next = buf;
@@ -508,7 +508,8 @@ base::Status JsonTraceTokenizer::ParseInternal(const char* start,
                                                const char* end,
                                                const char** out) {
   PERFETTO_DCHECK(json::IsJsonSupported());
-
+  std::cout << "JsonTraceTokenizer::ParseInternal"<< std::endl;
+  std::cout << "JsonTraceTokenizer::position: position_"<< int(position_) <<  std::endl;
   switch (position_) {
     case TracePosition::kDictionaryKey:
       return HandleDictionaryKey(start, end, out);
@@ -529,6 +530,7 @@ base::Status JsonTraceTokenizer::ParseInternal(const char* start,
 base::Status JsonTraceTokenizer::HandleTraceEvent(const char* start,
                                                   const char* end,
                                                   const char** out) {
+  std::cout << "JsonTraceTokenizer::HandleTraceEvent"<< std::endl;
   const char* next = start;
   while (next < end) {
     base::StringView unparsed;
@@ -657,11 +659,11 @@ base::Status JsonTraceTokenizer::HandleDictionaryKey(const char* start,
     case ReadKeyRes::kFoundKey:
       break;
   }
-
+  
   // ReadOneJsonKey should ensure that the first character of the value is
   // available.
   PERFETTO_CHECK(next < end);
-
+  std::cout << "kFoundKey::::" << key << std::endl;
   if (key == "traceEvents") {
     // Skip the [ character opening the array.
     if (*next != '[') {

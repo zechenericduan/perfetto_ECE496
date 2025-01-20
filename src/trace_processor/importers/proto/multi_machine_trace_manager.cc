@@ -16,7 +16,7 @@
 
 #include "src/trace_processor/importers/proto/multi_machine_trace_manager.h"
 #include <memory>
-
+#include <iostream>
 #include "src/trace_processor/importers/common/args_translation_table.h"
 #include "src/trace_processor/importers/common/async_track_set_tracker.h"
 #include "src/trace_processor/importers/common/clock_converter.h"

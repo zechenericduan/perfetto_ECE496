@@ -47,6 +47,7 @@ util::Status ReadTraceUsingRead(
     uint64_t* file_size,
     const std::function<void(uint64_t parsed_size)>& progress_callback) {
   // Load the trace in chunks using ordinary read().
+  std::cout << "ReadTraceUsingRead " << std::endl;
   for (int i = 0;; i++) {
     if (progress_callback && i % 128 == 0)
       progress_callback(*file_size);
@@ -74,7 +75,7 @@ util::Status ReadTraceUnfinalized(
     const char* filename,
     const std::function<void(uint64_t parsed_size)>& progress_callback) {
   uint64_t bytes_read = 0;
-
+std::cout << "ReadTraceUnfinalized " << std::endl;
 #if PERFETTO_HAS_MMAP()
   char* no_mmap = getenv("TRACE_PROCESSOR_NO_MMAP");
   bool use_mmap = !no_mmap || *no_mmap != '1';
@@ -91,6 +92,7 @@ util::Status ReadTraceUnfinalized(
         const size_t bytes_read_z = static_cast<size_t>(bytes_read);
         size_t slice_size = std::min(length - bytes_read_z, kMmapChunkSize);
         TraceBlobView slice = whole_mmap.slice_off(bytes_read_z, slice_size);
+        std::cout << "new slice" << std::endl;
         RETURN_IF_ERROR(tp->Parse(std::move(slice)));
         bytes_read += slice_size;
       }  // while (slices)
@@ -141,6 +143,18 @@ bool ReadTraceUnfinalizedCLP(trace_processor::TraceProcessor* tp,
     }
 
     auto rsize = input->gcount();
+        //////////////////////////////
+    std::cout << "Buffer contents (ASCII): ";
+    for (size_t j = 0; j < static_cast<size_t>(rsize); ++j) {
+        if (std::isprint(buf[j])) {
+            std::cout << static_cast<char>(buf[j]); // Print printable characters
+        } else {
+            std::cout << '.'; // Replace non-printable characters with '.'
+        }
+    }
+    std::cout << std::endl;
+    std::cout << "rsize = " << rsize << std::endl;
+    //////////////////////////////////
     if (rsize <= 0)
       break;
     file_size += static_cast<uint64_t>(rsize);
